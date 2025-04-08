@@ -9,7 +9,7 @@
   - `TELEGRAM_CHAT_ID`
 
 ## Развертывание
-1. Установка зависимостей: `pip install -r requirements.txt`
+1. Установка зависимостей: `python -m venv venv` потом `pip install -r requirements.txt`
 2. Настройка переменных окружения в `.env`
 3. Запуск сервера: `python fastapi_project.py`
 4. Сервер запускается на `http://0.0.0.0:8000`
