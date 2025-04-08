@@ -9,6 +9,106 @@
 3. Запуск сервера: `python fastapi_project.py`
 4. Сервер запускается на `http://0.0.0.0:8000`
 
+## Команды для UBUNTU
+1. Обновляем пакеты
+```
+sudo apt update
+```
+2. Устанавливаем NGINX
+   
+```
+sudo apt install nginx
+```
+
+3. Создаем файл конфигурации:
+
+```
+sudo nano /etc/nginx/sites-available/ВАШ_ДОМЕН.ru
+```
+4. Наполняем файл конфигурации:
+```
+server {
+    listen 80;
+    server_name ВАШ_ДОМЕН.ru www.ВАШ_ДОМЕН.ru;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;  # Порт, на котором работает FastAPI
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+5. символическая ссылка для активации конфигурации:
+   
+```
+sudo ln -s /etc/nginx/sites-available/ВАШ_ДОМЕН.ru /etc/nginx/sites-enabled/
+```
+6.  Тестируем nginx
+```
+sudo nginx -t
+```
+7. Перезапускаем Nginx
+```
+sudo systemctl restart nginx
+```
+8. Устанавливаем SSL
+```
+sudo apt install certbot python3-certbot-nginx
+```
+9. Настраиваем SSL
+```
+sudo certbot --nginx -d ВАШ_ДОМЕН.ru -d www.ВАШ_ДОМЕН.ru
+```
+10. Создаем крон задачу
+```
+sudo crontab -e
+```
+11. Конфигурируем крон
+```
+0 0 * * * certbot renew --quiet && systemctl reload nginx
+```
+12. Проверяем статус крон
+```
+sudo systemctl status certbot.timer
+```
+13. Создаем файл конфигов для демона
+```
+sudo nano /etc/systemd/system/НАЗВАНИЕ_СЕРВИСА_ЛЮБОЕ.service
+```
+14. Наполняем файл для демона
+```
+
+[Unit]
+Description=My Python Script Service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/ВАША_ПАПКА
+ExecStart=/bin/bash -c 'source /root/ВАША_ПАПКА/venv/bin/activate && /root/ВАША_ПАПКА/venv/bin/python /root/ВАША_ПАПКА/название_ФАЙЛА.py'
+Environment="PATH=/root/ВАША_ПАПКА/venv/bin:$PATH"
+Restart=on-failure
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+15. Перезапускаем службу демона
+```
+sudo systemctl daemon-reload
+```
+16. Запускаем службу демона
+```
+sudo systemctl start НАЗВАНИЕ_СЕРВИСА_СМ_ПУНКТ_13.service
+```
+17. Проверяем статус службы
+```
+sudo systemctl status НАЗВАНИЕ_СЕРВИСА_СМ_ПУНКТ_13.service
+```
+
 ## Архитектура
 
 ### Компоненты системы
